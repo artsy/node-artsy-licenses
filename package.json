@@ -1,0 +1,21 @@
+{
+  "name": "duedil",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "async": "^0.9.0",
+    "csv": "^0.4.1",
+    "nlf": "^1.1.0",
+    "underscore": "^1.8.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "clone": "coffee index.coffee clone",
+    "csvs": "coffee index.coffee csvs",
+    "coffee-script": "*"
+  },
+  "author": "",
+  "license": "MIT"
+}
