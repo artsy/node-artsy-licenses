@@ -59,7 +59,7 @@ repoToCSV = (repo, callback) ->
   nlf.find {
     directory: __dirname + '/clones/' + repo,
     production: true
-    depth: 1
+    depth: 0
   }, (err, data) ->
     return callback err if err
     pkgs = {}
@@ -72,7 +72,7 @@ repoToCSV = (repo, callback) ->
       pkgs[pkg.name].license or= getLicense(pkg)
     # Map into CSV data
     csvData = [['name', 'version', 'homepage', 'summary', 'license']]
-    csvData = csvData.concat (for n, pkgData of pkgs
+    csvData = csvData.concat (for n, pkgData of pkgs when pkgData.license
       { name, version, homepage, license } = pkgData
       [name, version, homepage, '', license]
     )
@@ -82,7 +82,6 @@ repoToCSV = (repo, callback) ->
 
 getLicense = (pkg) ->
   # package.json
-  console.log pkg.licenseSources.readme if pkg.name is 'tinycolor'
   license = _.compact(_.pluck(pkg.licenseSources.package.sources, 'license'))[0]
   # LISCENCE file
   license or= pkg.licenseSources.license.sources[0]?.name?()
