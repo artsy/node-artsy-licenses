@@ -8,21 +8,23 @@ nlf = require 'nlf'
 url = require 'url'
 
 repos = [
-  "inquiry-map"
-  "refraction"
-  "halbone"
-  "3d-artsy"
-  "backbone-cache-sync"
-  "artsy-2013"
-  "torque"
-  "positron"
-  "europa"
-  "microgravity"
-  "artsy-wwwify"
-  "flare"
-  "monolith"
-  "force"
-  "irtsybot"
+  'inquiry-map',
+  'refraction',
+  'halbone',
+  '3d-artsy',
+  'backbone-cache-sync',
+  'artsy-2013',
+  'torque',
+  'positron',
+  'europa',
+  'microgravity',
+  'artsy-wwwify',
+  'flare',
+  'monolith',
+  'force',
+  'irtsybot',
+  '2014.artsy.net',
+  'inertia'
 ]
 missingLicenses = []
 
@@ -51,15 +53,13 @@ writeCSVs = (callback) ->
       fs.writeFile "#{__dirname}/csvs/#{repo}.csv", data, cb
   , ->
     console.log 'DONE!'
-    console.log 'Missing licenses for...'
-    console.log list = _.reject(missingLicenses, (url) -> url is '(none)').join('\n')
+    # console.log 'Missing licenses for...'
+    # console.log "#{pkg.name} #{pkg.url}" for pkg in missingLicenses
     callback()
 
 repoToCSV = (repo, callback) ->
   nlf.find {
     directory: __dirname + '/clones/' + repo,
-    production: true
-    depth: 1
   }, (err, data) ->
     return callback err if err
     pkgs = {}
@@ -72,17 +72,18 @@ repoToCSV = (repo, callback) ->
       pkgs[pkg.name].license or= getLicense(pkg)
     # Map into CSV data
     csvData = [['name', 'version', 'homepage', 'summary', 'license']]
-    csvData = csvData.concat (for n, pkgData of pkgs
+    csvData = csvData.concat (for n, pkgData of pkgs when pkgData.license or pkgData.homepage
       { name, version, homepage, license } = pkgData
       [name, version, homepage, '', license]
     )
     # Find pkgs with missing licenses
-    missingLicenses.push pkgData.homepage for n, pkgData of pkgs when not pkgData.license
+    for n, pkgData of pkgs when not pkgData.license
+      console.log "Missing license for #{pkgData.name} at #{pkgData.homepage} in #{repo}"
+      missingLicenses.push { name: pkgData.name, url: pkgData.homepage }
     csv.stringify csvData, callback
 
 getLicense = (pkg) ->
   # package.json
-  console.log pkg.licenseSources.readme if pkg.name is 'tinycolor'
   license = _.compact(_.pluck(pkg.licenseSources.package.sources, 'license'))[0]
   # LISCENCE file
   license or= pkg.licenseSources.license.sources[0]?.name?()
@@ -99,6 +100,7 @@ getLicense = (pkg) ->
   # Normalize common license names
   license = 'MIT' if license.match /MIT/i
   license = 'Apache 2.0' if license.match /Apache.*2/i
+  license = 'BSD' if license.match /BSD/i
   license
 
 switch process.argv[2]
